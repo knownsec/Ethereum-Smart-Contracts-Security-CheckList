@@ -703,8 +703,8 @@ contract Attack {
 **关键事件应有Event记录，为了便于运维监控，除了转账，授权等函数以外，其他操作也需要加入详细的事件记录，如转移管理员权限、其他特殊的主功能**
 
 ```
-fonction transferOwnership(address newOwner) onlyOwner public {
-    ownner = newOwner;
+function transferOwnership(address newOwner) onlyOwner public {
+    owner = newOwner;
     emit OwnershipTransferred(owner, newowner);
     }
 ```
