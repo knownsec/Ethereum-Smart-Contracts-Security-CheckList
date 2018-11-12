@@ -316,7 +316,7 @@ contract OPL {
 - [ERC20 智能合约整数溢出系列漏洞披露](https://paper.seebug.org/626/)
 
 
-## (2) 重入漏洞
+## (2) call注入（重入漏洞）
 
 **call函数调用时，应该做严格的权限控制，或直接写死call调用的函数**
 
