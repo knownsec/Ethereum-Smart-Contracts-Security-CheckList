@@ -327,7 +327,7 @@ function withdraw(uint _amount) {
 	balances[msg.sender] -= _amount;
 }
 ```
-上面代码可以使用call注入转账，将大量合约代币递归转账而出。
+上述代码就是一个典型的存在call注入问题直接导致重入漏洞的demo。通过call注入转账，将大量合约代币递归转账而出。
 
 call注入可能导致代币窃取，权限绕过
 ```
@@ -337,6 +337,40 @@ addr.callcode(data);
 ```
 
 如delegatecall，在合约内必须调用其它合约时，可以使用关键字library，这样可以确保合约是无状态而且不可自毁的。通过强制设置合约为无状态可以一定程度上缓解储存环境的复杂性，防止攻击者通过修改状态来攻击合约。
+
+对于可能存在的重入问题，尽可能的使用transfer函数完成转账，或者限制call执行的gas，都可以有效的减少该问题的危害。
+
+```
+contract EtherStore {
+
+    // initialise the mutex
+    bool reEntrancyMutex = false;
+    uint256 public withdrawalLimit = 1 ether;
+    mapping(address => uint256) public lastWithdrawTime;
+    mapping(address => uint256) public balances;
+
+    function depositFunds() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
+    function withdrawFunds (uint256 _weiToWithdraw) public {
+        require(!reEntrancyMutex);
+        require(balances[msg.sender] >= _weiToWithdraw);
+        // limit the withdrawal
+        require(_weiToWithdraw <= withdrawalLimit);
+        // limit the time allowed to withdraw
+        require(now >= lastWithdrawTime[msg.sender] + 1 weeks);
+        balances[msg.sender] -= _weiToWithdraw;
+        lastWithdrawTime[msg.sender] = now;
+        // set the reEntrancy mutex before the external call
+        reEntrancyMutex = true;
+        msg.sender.transfer(_weiToWithdraw);
+        // release the mutex after the external call
+        reEntrancyMutex = false; 
+    }
+ }
+```
+上述代码是一种用互斥锁来避免递归防护方式。
 
 ### 真实世界事件
 
@@ -356,7 +390,7 @@ call注入
 
 ```
 function initContract() public {
-    owner = msg.reader;
+    owner = msg.sender;
 }
 ```
 上述代码作为初始函数不应该为public。
