@@ -10,6 +10,7 @@
 
 本CheckList在完成过程中参考并整理兼容了各大区块链安全研究团队的研究成果，CheckList中如有不完善/错误的地方也欢迎大家提issue.
 
+由于本文的目的主要是**CheckList**，所以文中不会包含太详细的漏洞/隐患信息，大部分漏洞分析在扫描报告中会有所提及。
 
 # 以太坊智能合约审计CheckList 目录
 
@@ -166,7 +167,9 @@ function transfer(address _to, uint256 _amount)  public returns (bool success) {
 
 **approve函数中应避免条件竞争**。在修改allowance前，应先修改为0，再修改为_value。
 
-通过置0的方式，可以在一定程度上缓解条件竞争中产生的危害，合约管理人可以通过检查日志来判断是否有条件竞争情况的发生。
+这个漏洞的起因是由于底层矿工协议中为了鼓励矿工挖矿，矿工可以自己决定打包什么交易，为了收益更大，矿工一般会选择打包gas price更大的交易，而不会依赖交易顺序的前后。
+
+通过置0的方式，可以在一定程度上缓解条件竞争中产生的危害，合约管理人可以通过检查日志来判断是否有条件竞争情况的发生，这种修复方式更大的意义在于，提醒使用approve函数的用户，该函数的操作在一定程度上是不可逆的。
 ```
 function approve(address _spender, uint256 _value) public returns (bool success){
     allowance[msg.sender][_spender] = _value;
