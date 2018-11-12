@@ -5,3 +5,5 @@
 本CheckList在完成过程中参考并整理兼容了各大区块链安全研究团队的研究成果，CheckList中如有不完善/错误的地方也欢迎大家提issue.
 
 [以太坊智能合约审计checkList](./以太坊智能合约审计CheckList.md)
+
+[以太坊智能合约审计CheckList.pdf(PDF)](./以太坊智能合约审计CheckList.pdf)
