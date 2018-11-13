@@ -10,6 +10,7 @@
 
 本CheckList在完成过程中参考并整理兼容了各大区块链安全研究团队的研究成果，CheckList中如有不完善/错误的地方也欢迎大家提issue.
 
+由于本文的目的主要是**CheckList**，所以文中不会包含太详细的漏洞/隐患信息，大部分漏洞分析在扫描报告中会有所提及。
 
 # 以太坊智能合约审计CheckList 目录
 
@@ -35,9 +36,11 @@
             * [真实世界事件](#真实世界事件-2)
       * [(2) 重入漏洞](#2-重入漏洞)
          * [真实世界事件](#真实世界事件-3)
-      * [(3) 权限控制](#3-权限控制)
+      * [(3) call注入](#3-call注入)
          * [真实世界事件](#真实世界事件-4)
-      * [(4) 重放攻击](#4-重放攻击)
+      * [(4) 权限控制](#4-权限控制)
+         * [真实世界事件](#真实世界事件-5)
+      * [(5) 重放攻击](#5-重放攻击)
    * [4、编码设计问题](#4编码设计问题)
       * [(1) 地址初始化问题](#1-地址初始化问题)
       * [(2) 判断函数问题](#2-判断函数问题)
@@ -166,7 +169,9 @@ function transfer(address _to, uint256 _amount)  public returns (bool success) {
 
 **approve函数中应避免条件竞争**。在修改allowance前，应先修改为0，再修改为_value。
 
-通过置0的方式，可以在一定程度上缓解条件竞争中产生的危害，合约管理人可以通过检查日志来判断是否有条件竞争情况的发生。
+这个漏洞的起因是由于底层矿工协议中为了鼓励矿工挖矿，矿工可以自己决定打包什么交易，为了收益更大，矿工一般会选择打包gas price更大的交易，而不会依赖交易顺序的前后。
+
+通过置0的方式，可以在一定程度上缓解条件竞争中产生的危害，合约管理人可以通过检查日志来判断是否有条件竞争情况的发生，这种修复方式更大的意义在于，提醒使用approve函数的用户，该函数的操作在一定程度上是不可逆的。
 ```
 function approve(address _spender, uint256 _value) public returns (bool success){
     allowance[msg.sender][_spender] = _value;
@@ -315,7 +320,15 @@ contract OPL {
 
 ## (2) 重入漏洞
 
-**call函数调用时，应该做严格的权限控制，或直接写死call调用的函数**
+**智能合约中避免使用call来交易，避免重入漏洞**
+
+在智能合约中提供了call、send、transfer三种方式来交易以太坊，其中call最大的区别就是没有限制gas，而其他两种在gas不够的情况下都会报out of gas。
+
+重入漏洞有几大特征。
+1、使用了call函数作为转账函数
+2、没有限制call函数的gas
+3、扣余额在转账之后
+4、call时加入了()来执行fallback函数
 
 ```
 function withdraw(uint _amount) {
@@ -324,9 +337,55 @@ function withdraw(uint _amount) {
 	balances[msg.sender] -= _amount;
 }
 ```
-上面代码可以使用call注入转账，将大量合约代币递归转账而出。
+上述代码就是一个简单的重入漏洞的demo。通过重入注入转账，将大量合约代币递归转账而出。
 
-call注入可能导致代币窃取，权限绕过
+对于可能存在的重入问题，尽可能的使用transfer函数完成转账，或者限制call执行的gas，都可以有效的减少该问题的危害。
+
+```
+contract EtherStore {
+
+    // initialise the mutex
+    bool reEntrancyMutex = false;
+    uint256 public withdrawalLimit = 1 ether;
+    mapping(address => uint256) public lastWithdrawTime;
+    mapping(address => uint256) public balances;
+
+    function depositFunds() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
+    function withdrawFunds (uint256 _weiToWithdraw) public {
+        require(!reEntrancyMutex);
+        require(balances[msg.sender] >= _weiToWithdraw);
+        // limit the withdrawal
+        require(_weiToWithdraw <= withdrawalLimit);
+        // limit the time allowed to withdraw
+        require(now >= lastWithdrawTime[msg.sender] + 1 weeks);
+        balances[msg.sender] -= _weiToWithdraw;
+        lastWithdrawTime[msg.sender] = now;
+        // set the reEntrancy mutex before the external call
+        reEntrancyMutex = true;
+        msg.sender.transfer(_weiToWithdraw);
+        // release the mutex after the external call
+        reEntrancyMutex = false; 
+    }
+ }
+```
+上述代码是一种用互斥锁来避免递归防护方式。
+
+### 真实世界事件
+
+The Dao
+- [The DAO](https://en.wikipedia.org/wiki/The_DAO_(organization))
+- [The DAO address](https://etherscan.io/address/0xbb9bc244d798123fde783fcc1c72d3bb8c189413#code)
+
+## (3) call注入
+
+**call函数调用时，应该做严格的权限控制，或直接写死call调用的函数**
+
+在EVM的设计中，如果call的参数data是0xdeadbeef(假设的一个函数名) + 0x0000000000.....01，这样的话就是调用函数
+
+call注入可能导致代币窃取，权限绕过，通过call注入可以调用私有函数，甚至部分高权限函数。
 ```
 addr.call(data);             
 addr.delegatecall(data); 
@@ -337,15 +396,11 @@ addr.callcode(data);
 
 ### 真实世界事件
 
-The Dao
-- [The DAO](https://en.wikipedia.org/wiki/The_DAO_(organization))
-- [The DAO address](https://etherscan.io/address/0xbb9bc244d798123fde783fcc1c72d3bb8c189413#code)
-
 call注入
 - [以太坊智能合约call注入攻击](https://paper.seebug.org/624/)
 - [以太坊 Solidity 合约 call 函数簇滥用导致的安全风险](https://paper.seebug.org/633/)
 
-## (3) 权限控制
+## (4) 权限控制
 
 **合约中不同函数应设置合理的权限**
 
@@ -353,7 +408,7 @@ call注入
 
 ```
 function initContract() public {
-    owner = msg.reader;
+    owner = msg.sender;
 }
 ```
 上述代码作为初始函数不应该为public。
@@ -370,7 +425,7 @@ Rubixi
 - [Rubixi](https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/)
 
 
-## (4) 重放攻击
+## (5) 重放攻击
 
 **合约中如果涉及委托管理的需求，应注意验证的不可复用性，避免重放攻击**
 
@@ -700,8 +755,8 @@ contract Attack {
 **关键事件应有Event记录，为了便于运维监控，除了转账，授权等函数以外，其他操作也需要加入详细的事件记录，如转移管理员权限、其他特殊的主功能**
 
 ```
-fonction transferOwnership(address newOwner) onlyOwner public {
-    ownner = newOwner;
+function transferOwnership(address newOwner) onlyOwner public {
+    owner = newOwner;
     emit OwnershipTransferred(owner, newowner);
     }
 ```

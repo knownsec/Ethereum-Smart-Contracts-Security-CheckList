@@ -11,3 +11,15 @@
 [以太坊智能合约审计checkList](./以太坊智能合约审计CheckList.md)
 
 [以太坊智能合约审计CheckList.pdf(PDF)](./以太坊智能合约审计CheckList.pdf)
+
+
+## 致谢
+
+感谢  
+- @王二#johnwick.io 
+- @郭文生|成都链安科 
+- @程君@创世安全 
+- @余弦 | 慢雾  
+- 404的小伙伴
+
+在CheckList完善过程中提出的意见
