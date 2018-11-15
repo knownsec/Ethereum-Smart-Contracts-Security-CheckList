@@ -640,9 +640,6 @@ function airdrop()
 
 当然**hash-commit**在一些简单场景下也是不错的实现方式。即玩家提交行动计划的hash，然后生成随机数，然后提交行动计划。
 
-
-
-
 ### 真实世界事件
 
 Fomo3d薅羊毛
@@ -652,6 +649,27 @@ Fomo3d薅羊毛
 Last Winner
 - [https://paper.seebug.org/672/](https://paper.seebug.org/672/)
 
+## (8) 变量覆盖问题
+
+**在合约中避免array变量key可以被控制**
+
+```
+map[uint256(msg.sender)+x] = blockNum;
+```
+在EVM中数组和其他类型不同，因为数组时动态大小的，所以map类型的数据计算方式为
+```
+address(map_data) = sha3(key,slot)+offset
+```
+其中key就是map变量定义的位置，也就是1，offset就是数组中的偏移，比如map[2]，offset就是2.
+
+map[2]的地址就是`sha3(1)+2`，假设map[2]=2333，则`storage[sha3(1)+2]=2333`。
+
+这样一来就出现问题了，由于offset我们可控，我们就可以向storage的任意地址写值。
+
+这就可能覆盖storage的任意地址的值，影响代码本身的逻辑，导致进一步更严重的问题。
+
+详细的原理可以看
+[https://paper.seebug.org/739/](https://paper.seebug.org/739/)
 
 # 5、编码问题隐患
 
