@@ -658,9 +658,9 @@ Last Winner
 ```
 map[uint256(msg.sender)+x] = blockNum;
 ```
-在EVM中数组和其他类型不同，因为数组时动态大小的，所以map类型的数据计算方式为
+在EVM中数组和其他类型不同，因为数组时动态大小的，所以数组类型的数据计算方式为
 ```
-address(map_data) = sha3(key,slot)+offset
+address(map_data) = sha3(key)+offset
 ```
 其中key就是map变量定义的位置，也就是1，offset就是数组中的偏移，比如map[2]，offset就是2.
 
@@ -671,7 +671,8 @@ map[2]的地址就是`sha3(1)+2`，假设map[2]=2333，则`storage[sha3(1)+2]=23
 这就可能覆盖storage的任意地址的值，影响代码本身的逻辑，导致进一步更严重的问题。
 
 详细的原理可以看
-[https://paper.seebug.org/739/](https://paper.seebug.org/739/)
+- [以太坊智能合约 OPCODE 逆向之理论基础篇](https://paper.seebug.org/640/#3)
+- [https://paper.seebug.org/739/](https://paper.seebug.org/739/)
 
 # 5、编码问题隐患
 
