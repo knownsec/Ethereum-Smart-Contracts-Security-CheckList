@@ -1,8 +1,22 @@
-# 以太坊合约审计checkList
+# Ethereum Smart Contract Audit CheckList
 
-作者：知道创宇404区块链安全研究团队
+Author：LoRexxar @知道创宇404区块链安全研究团队/Knownsec 404Team
+Translator: Liujx & Liufang & LoRexxar @Knownsec 404Team
 
-时间：2018.11.12
+Time：2018.11.12
+
+
+## en
+
+In the Ethereum contract audit checkList, I divided the problems encountered in the Ethereum contract audit into five major categories, including coding specification problems, design defect problems, coding security problems, coding design problems, and coding problems. It covers more than 29 issues that will arise during the Ethereum Smart Contract audit process. Help smart contract developers and security workers get started quickly with smart contract security.
+
+This CheckList refers to and complies with the research results of the major blockchain security research teams in the completion process. If there are imperfections/errors in the CheckList, you are welcome to submit the issue.
+
+[Ethereum Smart Contract Audit CheckList](./Ethereum Smart Contract Audit CheckList.md)
+
+[Ethereum Smart Contract Audit CheckList(PDF)](./Ethereum Smart Contract Audit CheckList.pdf)
+
+## zh
 
 在以太坊合约审计checkList中，我将以太坊合约审计中遇到的问题分为5大种，包括编码规范问题、设计缺陷问题、编码安全问题、编码设计问题、编码问题隐患。其中涵盖了超过29种会出现以太坊智能合约审计过程中遇到的问题。帮助智能合约的开发者和安全工作者快速入门智能合约安全。
 
