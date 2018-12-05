@@ -15,7 +15,7 @@ Because this article is mainly a CheckList, the article will not contain too det
    * [Ethereum Smart Contract Audit CheckList](#ethereum-smart-contract-audit-checklist)
    * [Contents](#contents)
    * [1. Coding specification issue](#1-coding-specification-issue)
-      * [(1) Compiler version](#1-compiler-version
+      * [(1) Compiler version](#1-compiler-version)
       * [(2) Constructor writing issue](#2-constructor-writing-issue)
       * [(3) Return standard](#3-return-standard)
       * [(4) Event standard](#4-event-standard)
@@ -61,7 +61,7 @@ Because this article is mainly a CheckList, the article will not contain too det
       * [(9) User authentication issue](#9-user-authentication-issue)
       * [(10) Race condition issue](#10-race-condition-issue)
          * [Real world event](#real-world-event-6)
-      * [(11) Uninitialized storage pointer](#11-uninitialized-storage-point
+      * [(11) Uninitialized storage pointer](#11-uninitialized-storage-point)
    * [CheckList audit series report](#checklist-audit-series-report)
    * [REF](#ref)
 
