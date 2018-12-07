@@ -1,8 +1,8 @@
 # Ethereum Smart Contract Audit CheckList
 
-Author：LoRexxar @知道创宇404区块链安全研究团队/Knownsec 404Team
+Author：LoRexxar @Knownsec 404 Team
 
-Translator: Liujx & Liufang & LoRexxar @Knownsec 404Team
+Translator: Liujx & Liufang & LoRexxar @Knownsec 404 Team
 
 Time：2018.11.12
 
