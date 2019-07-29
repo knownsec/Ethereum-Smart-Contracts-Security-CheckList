@@ -62,6 +62,8 @@ Because this article is mainly a CheckList, the article will not contain too det
       * [(10) Race condition issue](#10-race-condition-issue)
          * [Real world event](#real-world-event-6)
       * [(11) Uninitialized storage pointer](#11-uninitialized-storage-point)
+      * [(12) Input Aliasing](#11-input-aliasing)
+         * [Real world event](#real-world-event-7)
    * [CheckList audit series report](#checklist-audit-series-report)
    * [REF](#ref)
 
@@ -945,6 +947,18 @@ After the above code is compiled, s.x and s.y will point incorrectly to owner an
 After the attacker executes fake_foo, the owner will be changed to himself.
 
 The above issue was fixed in the latest version of 0.4.25.
+
+## (12) Input Aliasing
+
+** When introducing zero-knowledge proof as a condition for verifying a contract, you need to beware of the “Input Aliasing”. **
+
+In cryptography, the range of the `{x, y}` of the elliptic curve is a finite field based on mod p, and the encryption based on the elliptic curve is also performed in this finite field loop. In the implementation of smart contracts, there may be multiple numbers that correspond to the same Fq after mod operation. In this case, we refer to these multiple large integers as “input Aliasing”, and these numbers are pseudonyms. This means that multiple numbers of each other can be repeatedly verified, and five "input Aliasing" can be used to repeat the payment of five times.
+
+### Real world event
+
+Fomo3D Incident
+
+- [## zkSNARK 合约「输入假名」漏洞致众多混币项目爆雷](https://mp.weixin.qq.com/s/IJc5HyA_VEEl3pd76lNZcw)
 
 # CheckList audit reports
 
