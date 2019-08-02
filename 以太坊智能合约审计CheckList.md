@@ -755,7 +755,7 @@ contract Auction{
         require(msg.value > highestBid);
         require(currentLeader.send(highestBid));
         currentLeader = msg.sender;
-        highestBid = currentLeader;
+        highestBid = msg.value;
     }
 }
 ```
